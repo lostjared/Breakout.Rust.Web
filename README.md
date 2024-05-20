@@ -80,8 +80,7 @@ function touchMoveB(e) {
     e.preventDefault();
 }
 
-// Add event listeners for mouse and touch events
-var canvas = document.getElementById('myCanvas');
+// Add event listeners for mouse and touch event
 canvas.addEventListener('mousemove', mouseMoveB, false);
 canvas.addEventListener('touchmove', touchMoveB, false);
 ```
