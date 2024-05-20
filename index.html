@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rust Breakout</title>
+
+    <style type="text/css">
+
+        .div1 {
+            text-align: center;
+        }
+        
+        .can1 {
+            width: 60%;
+            height: auto;
+        }
+        
+        input {
+            font-size: 24px;
+        }
+        
+        .con1 {
+            text-align: center;
+        }
+        
+        .con2 {
+            text-align: center;
+        }
+        
+        body {
+            background-color: #000000;
+        }
+
+        a {
+            color: rgb(255,255,255);
+        }
+        .span1 {
+            color: rgb(255,255,255);
+            font-size: 32px;
+        }
+        </style>
+
+
+</head>
+<body>
+    <script type="module">
+       // Function to generate a random number between min and max (inclusive)
+       export function random_range(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+       }
+
+        // Import the WASM module
+        import init, { Breakout, Ball, Paddle, Grid, example_random_range_usage } from './web/breakout.js';
+
+        var breakout;
+        var paddle;
+       
+        var WIDTH=960;
+        var HEIGHT=720;
+        var TILE_W=960/32;
+        var TILE_H=720/2/16;
+
+        async function run() {
+            await init();
+            breakout = new Breakout();
+            paddle = breakout.paddle;
+            main();
+        }
+
+        run();
+        var can = document.getElementById("can1");
+        var context = can.getContext("2d");
+        
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        var randomColors = [];
+
+        function setRandom() {
+            randomColors = [];
+            for (let i = 0; i < 100; i++) {
+                 randomColors.push(getRandomColor());
+            }
+        }
+
+        function main() {
+            setRandom();
+            breakout.new_game();
+            window.addEventListener("keydown", keyPressed, true);
+            var istouch = 'ontouchstart' in window;
+            if(istouch) {
+                window.addEventListener("touchmove", mouseMove, true);
+                }
+            else {
+                window.addEventListener("mousemove", mouseMoveB, true);
+            }
+
+
+
+            setInterval(drawScreen, 25);
+            drawScreen();
+        }
+
+        var downX = 0, downY = 0,upX = 0, upY = 0;
+        var old_down_X = 0;
+        var old_pos = 0;
+        var is_down = false;
+        var is_moved = false
+        
+        function moveLeft() {
+            if(paddle.x > 0) {
+                paddle.x -= 20;
+                breakout.set_paddle_xy(paddle.x, paddle.y);
+                drawScreen();                   
+            }
+     
+        }
+        function moveRight() {
+            if(paddle.x < 960-210) {
+                    paddle.x += 20;
+                    breakout.set_paddle_xy(paddle.x, paddle.y);
+                    drawScreen();
+                }
+        }
+
+        function mouseMove(e) {
+            var canvas = document.getElementById('can1');
+            var rect = canvas.getBoundingClientRect(); s
+            var xpos = e.touches[0].clientX - rect.left;
+            var ypos = e.touches[0].clientY - rect.top;
+            if (xpos > 0 && xpos+200 < canvas.width) {
+                breakout.set_paddle_xy(xpos, paddle.y);
+            }
+            e.stopPropagation();
+            e.preventDefault();
+        }   
+
+
+        function mouseMoveB(e) {
+            var canvas = document.getElementById('can1');
+            var rect = canvas.getBoundingClientRect(); 
+            var xpos = e.clientX - rect.left;
+            var ypos = e.clientY - rect.top;
+             if (xpos > 0 && xpos+200 < canvas.width) {
+                breakout.set_paddle_xy(xpos, paddle.y);
+
+            }
+            e.stopPropagation();
+            e.preventDefault();
+        }
+        function keyPressed(key) {
+            if(key.keyCode == 37) {
+                if(paddle.x > 0) {
+                    paddle.x -= 20;
+                    breakout.set_paddle_xy(paddle.x, paddle.y);
+                    drawScreen();                   
+                }
+            } else if (key.keyCode == 39) {
+                if(paddle.x < 960-210) {
+                    paddle.x += 20;
+                    breakout.set_paddle_xy(paddle.x, paddle.y);
+                    drawScreen();
+                }
+            }
+        }
+        
+        function drawScreen() {
+            context.fillStyle = "#000000";
+            context.fillRect(0, 0, WIDTH, HEIGHT);
+            let tile_w = WIDTH/32;
+            let tile_h = HEIGHT/2/16;
+            for(var x = 0; x < tile_w-1; ++x) {
+                for(var y = 0; y < tile_h-1; ++y) {
+                    context.fillStyle="#BD0000";
+                    let pos = breakout.grid.index(x, y);
+                    if(pos == 0) continue;
+                    context.fillStyle=randomColors[pos];
+                    context.fillRect(x*32, y*16, 32, 16);
+                }
+            }
+            context.fillStyle = "#FFFFFF";
+            context.fillRect(breakout.ball.x, breakout.ball.y, 16, 16);
+            context.fillStyle = "#FFFFFF";
+            context.fillRect(breakout.paddle.x, breakout.paddle.y, 200, 20);
+            context.fillStyle = randomColors[random_range(0, 10)];
+            context.font="14px Verdana";
+            context.fillText("Score: " + breakout.score + " Lives: " + breakout.lives, 15, 690);
+        
+            if(breakout.update()) {
+                setRanom();
+            }
+        }
+    
+    </script>
+
+    <div class="con2">
+    <span class="span1"><b>Breakout Rust</b></span>
+    </div><br>
+    <div class="div1">
+    <canvas class="can1" id="can1" width="960" height="720">
+    </canvas>
+    </div>
+
+</body>
+</html>
