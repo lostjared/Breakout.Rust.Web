@@ -113,7 +113,6 @@
             if (paddle.x > 0) {
                 paddle.x -= 40;
                 breakout.set_paddle_xy(paddle.x, paddle.y);
-                drawScreen();
             }
         }
 
@@ -121,7 +120,6 @@
             if (paddle.x < 960-210) {
                 paddle.x += 40;
                 breakout.set_paddle_xy(paddle.x, paddle.y);
-                drawScreen();
             }
         }
 
@@ -181,13 +179,11 @@
                 if (paddle.x > 0) {
                     paddle.x -= 20;
                     breakout.set_paddle_xy(paddle.x, paddle.y);
-                    drawScreen();
                 }
             } else if (key.keyCode == 39) {
                 if (paddle.x < 960-210) {
                     paddle.x += 20;
                     breakout.set_paddle_xy(paddle.x, paddle.y);
-                    drawScreen();
                 }
             }
         }
