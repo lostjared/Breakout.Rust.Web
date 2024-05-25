@@ -6,7 +6,6 @@
     <title>Rust Breakout</title>
 
     <style type="text/css">
-
         .div1 {
             text-align: center;
         }
@@ -39,23 +38,21 @@
             color: rgb(255,255,255);
             font-size: 32px;
         }
-        </style>
-
-
+    </style>
 </head>
 <body>
     <script type="module">
-       // Function to generate a random number between min and max (inclusive)
-       export function random_range(min, max) {
+        // Function to generate a random number between min and max (inclusive)
+        export function random_range(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
-       }
+        }
 
         // Import the WASM module
         import init, { Breakout, Ball, Paddle, Grid, example_random_range_usage } from './web/breakout.js';
 
         var breakout;
         var paddle;
-       
+
         var WIDTH=960;
         var HEIGHT=720;
         var TILE_W=960/32;
@@ -86,7 +83,7 @@
         function setRandom() {
             randomColors = [];
             for (let i = 0; i < 100; i++) {
-                 randomColors.push(getRandomColor());
+                randomColors.push(getRandomColor());
             }
         }
 
@@ -96,14 +93,15 @@
             window.addEventListener("keydown", keyPressed, true);
             window.addEventListener('touchstart', touchStart, true);
             window.addEventListener('touchmove', touchMove, true);
-            window.addEventListener("mousedown",mouseDown, true);
+            window.addEventListener("mousedown", mouseDown, true);
             window.addEventListener("mousemove", mouseMoveB, true);
 
-            setInterval(drawScreen, 25);
-            drawScreen();
+            // Start the animation loop
+            lastTimestamp = performance.now();
+            requestAnimationFrame(loop);
         }
 
-        var downX = 0, downY = 0,upX = 0, upY = 0;
+        var downX = 0, downY = 0, upX = 0, upY = 0;
         var old_down_X = 0;
         var old_pos = 0;
         var is_down = false;
@@ -112,102 +110,100 @@
         var speedMultiplier = 3;
 
         function moveLeft() {
-            if(paddle.x > 0) {
-                paddle.x -= 20;
+            if (paddle.x > 0) {
+                paddle.x -= 40;
                 breakout.set_paddle_xy(paddle.x, paddle.y);
-                drawScreen();                   
+                drawScreen();
             }
-     
         }
+
         function moveRight() {
-            if(paddle.x < 960-210) {
-                    paddle.x += 20;
-                    breakout.set_paddle_xy(paddle.x, paddle.y);
-                    drawScreen();
-                }
+            if (paddle.x < 960-210) {
+                paddle.x += 40;
+                breakout.set_paddle_xy(paddle.x, paddle.y);
+                drawScreen();
+            }
         }
+
         function touchStart(e) {
             touchStartX = e.touches[0].clientX;
             e.stopPropagation();
             e.preventDefault();
         }
 
-    function touchMove(e) {
-        var canvas = document.getElementById('can1');
-        var rect = canvas.getBoundingClientRect();
-        var touchCurrentX = e.touches[0].clientX;
-        var deltaX = (touchCurrentX - touchStartX) * speedMultiplier;
-        var newPaddleX = paddle.x + deltaX; 
-        var paddleWidth = 200; 
-        if (newPaddleX < 0) {
-            newPaddleX = 0;
-        } else if (newPaddleX + paddleWidth > canvas.width) {
-            newPaddleX = canvas.width - paddleWidth;
-        }
-        paddle.x = newPaddleX;
-        breakout.set_paddle_xy(paddle.x, paddle.y);
-        touchStartX = touchCurrentX;
-        e.stopPropagation();
-        e.preventDefault();
-    }
-
-
-    function mouseDown(e) {
-        
-    }
-
-    function mouseMove(e) {
-        var canvas = document.getElementById('can1');
-        var rect = canvas.getBoundingClientRect();
-        var xpos = e.clientX - rect.left;
-        var ypos = e.clientY - rect.top;
-        if (xpos > 0 && xpos + 200 < canvas.width) {
-            breakout.set_paddle_xy(xpos, paddle.y);
-        }
-        e.stopPropagation();
-        e.preventDefault(); 
-    }
-
-    function mouseMoveB(e) {
-        var canvas = document.getElementById('can1');
-        var rect = canvas.getBoundingClientRect();
-        var xpos = e.clientX - rect.left;
-        var ypos = e.clientY - rect.top;
-        if (xpos > 0 && xpos + 200 < canvas.width) {
-            breakout.set_paddle_xy(xpos, paddle.y);
-        }
-        e.stopPropagation();
-        e.preventDefault();
-    }
-
-    function keyPressed(key) {
-        if(key.keyCode == 37) {
-            if(paddle.x > 0) {
-                paddle.x -= 20;
-                breakout.set_paddle_xy(paddle.x, paddle.y);
-                drawScreen();                   
+        function touchMove(e) {
+            var canvas = document.getElementById('can1');
+            var rect = canvas.getBoundingClientRect();
+            var touchCurrentX = e.touches[0].clientX;
+            var deltaX = (touchCurrentX - touchStartX) * speedMultiplier;
+            var newPaddleX = paddle.x + deltaX;
+            var paddleWidth = 200;
+            if (newPaddleX < 0) {
+                newPaddleX = 0;
+            } else if (newPaddleX + paddleWidth > canvas.width) {
+                newPaddleX = canvas.width - paddleWidth;
             }
-        } else if (key.keyCode == 39) {
-            if(paddle.x < 960-210) {
-                paddle.x += 20;
-                breakout.set_paddle_xy(paddle.x, paddle.y);
-                drawScreen();
+            paddle.x = newPaddleX;
+            breakout.set_paddle_xy(paddle.x, paddle.y);
+            touchStartX = touchCurrentX;
+            e.stopPropagation();
+            e.preventDefault();
+        }
+
+        function mouseDown(e) {}
+
+        function mouseMove(e) {
+            var canvas = document.getElementById('can1');
+            var rect = canvas.getBoundingClientRect();
+            var xpos = e.clientX - rect.left;
+            var ypos = e.clientY - rect.top;
+            if (xpos > 0 && xpos + 200 < canvas.width) {
+                breakout.set_paddle_xy(xpos, paddle.y);
+            }
+            e.stopPropagation();
+            e.preventDefault();
+        }
+
+        function mouseMoveB(e) {
+            var canvas = document.getElementById('can1');
+            var rect = canvas.getBoundingClientRect();
+            var xpos = e.clientX - rect.left;
+            var ypos = e.clientY - rect.top;
+            if (xpos > 0 && xpos + 200 < canvas.width) {
+                breakout.set_paddle_xy(xpos, paddle.y);
+            }
+            e.stopPropagation();
+            e.preventDefault();
+        }
+
+        function keyPressed(key) {
+            if (key.keyCode == 37) {
+                if (paddle.x > 0) {
+                    paddle.x -= 20;
+                    breakout.set_paddle_xy(paddle.x, paddle.y);
+                    drawScreen();
+                }
+            } else if (key.keyCode == 39) {
+                if (paddle.x < 960-210) {
+                    paddle.x += 20;
+                    breakout.set_paddle_xy(paddle.x, paddle.y);
+                    drawScreen();
+                }
             }
         }
-    }
-        
+
         function drawScreen() {
             context.fillStyle = "#000000";
             context.fillRect(0, 0, WIDTH, HEIGHT);
-            let tile_w = WIDTH/32;
-            let tile_h = HEIGHT/2/16;
-            for(var x = 0; x < tile_w-1; ++x) {
-                for(var y = 0; y < tile_h-1; ++y) {
-                    context.fillStyle="#BD0000";
+            let tile_w = WIDTH / 32;
+            let tile_h = HEIGHT / 2 / 16;
+            for (var x = 0; x < tile_w - 1; ++x) {
+                for (var y = 0; y < tile_h - 1; ++y) {
+                    context.fillStyle = "#BD0000";
                     let pos = breakout.grid.index(x, y);
-                    if(pos == 0) continue;
-                    context.fillStyle=randomColors[pos];
-                    context.fillRect(x*32, y*16, 32, 16);
+                    if (pos == 0) continue;
+                    context.fillStyle = randomColors[pos];
+                    context.fillRect(x * 32, y * 16, 32, 16);
                 }
             }
             context.fillStyle = "#FFFFFF";
@@ -215,23 +211,38 @@
             context.fillStyle = "#FFFFFF";
             context.fillRect(breakout.paddle.x, breakout.paddle.y, 200, 20);
             context.fillStyle = randomColors[random_range(0, 10)];
-            context.font="14px Verdana";
+            context.font = "14px Verdana";
             context.fillText("Score: " + breakout.score + " Lives: " + breakout.lives, 15, 690);
-        
-            if(breakout.update()) {
+
+            if (breakout.update()) {
                 setRandom();
             }
         }
-    
+
+        let lastTimestamp = 0;
+        let accumulatedTime = 0;
+        const FRAME_DURATION = 25; // Desired frame duration in milliseconds
+
+        function loop(timestamp) {
+            const deltaTime = timestamp - lastTimestamp;
+            lastTimestamp = timestamp;
+
+            accumulatedTime += deltaTime;
+
+            if (accumulatedTime >= FRAME_DURATION) {
+                drawScreen();
+                accumulatedTime -= FRAME_DURATION;
+            }
+
+            requestAnimationFrame(loop);
+        }
     </script>
 
     <div class="con2">
-    <span class="span1"><b>Breakout Rust</b></span>
+        <span class="span1"><b>Breakout Rust</b></span>
     </div><br>
     <div class="div1">
-    <canvas class="can1" id="can1" width="960" height="720">
-    </canvas>
+        <canvas class="can1" id="can1" width="960" height="720"></canvas>
     </div>
-
 </body>
 </html>
